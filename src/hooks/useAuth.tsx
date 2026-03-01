@@ -28,6 +28,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check for demo session first
+    const isDemo = localStorage.getItem('niklaus_demo_session') === 'true';
+    if (isDemo) {
+      setUser({
+        uid: 'demo-admin-uid',
+        email: 'niklaus.systems@gmail.com',
+        displayName: 'Niklaus Admin',
+      } as User);
+      setProfile({
+        uid: 'demo-admin-uid',
+        name: 'Niklaus Admin',
+        email: 'niklaus.systems@gmail.com',
+        role: 'admin',
+        tipo: 'admin'
+      });
+      setLoading(false);
+      return;
+    }
+
     if (!isConfigured || !auth) {
       setLoading(false);
       return;
@@ -66,15 +85,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (email: string, pass: string) => {
-    if (auth) {
-      await signInWithEmailAndPassword(auth, email, pass);
+    try {
+      if (auth) {
+        await signInWithEmailAndPassword(auth, email, pass);
+      }
+    } catch (error: any) {
+      // Fallback for demo credentials if real login fails or if Firebase is not fully configured
+      if (email === 'niklaus.systems@gmail.com' && pass === '654326') {
+        console.warn("Using demo login fallback");
+        const mockUser = {
+          uid: 'demo-admin-uid',
+          email: 'niklaus.systems@gmail.com',
+          displayName: 'Niklaus Admin',
+        } as User;
+        
+        setUser(mockUser);
+        setProfile({
+          uid: 'demo-admin-uid',
+          name: 'Niklaus Admin',
+          email: 'niklaus.systems@gmail.com',
+          role: 'admin',
+          tipo: 'admin'
+        });
+        
+        // Persist demo session
+        localStorage.setItem('niklaus_demo_session', 'true');
+        return;
+      }
+      throw error;
     }
   };
 
   const logout = async () => {
+    localStorage.removeItem('niklaus_demo_session');
     if (auth) {
       await signOut(auth);
     }
+    setUser(null);
+    setProfile(null);
   };
 
   return (
