@@ -21,7 +21,11 @@ export default function Login() {
       navigate('/');
     } catch (err: any) {
       console.error(err);
-      setError('Falha no login. Verifique suas credenciais.');
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setError('Credenciais inválidas. Use o email e senha padrão do Niklaus.');
+      } else {
+        setError('Falha no login. Verifique sua conexão ou configurações do Firebase.');
+      }
     } finally {
       setLoading(false);
     }
