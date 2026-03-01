@@ -1,0 +1,9 @@
+{
+  "name": "NIKLAUS - Gestão de Vendas e Estoque",
+  "description": "Sistema completo de PDV, estoque e gestão financeira com IA e tema dark neon.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}

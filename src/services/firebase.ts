@@ -1,0 +1,32 @@
+import { initializeApp, FirebaseApp } from "firebase/app";
+import { getAuth, Auth } from "firebase/auth";
+import { getFirestore, Firestore } from "firebase/firestore";
+import { getStorage, FirebaseStorage } from "firebase/storage";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAQ-XjP4tc6axCBB95vN1BZQsljek6hdQI",
+  authDomain: "niklaus-28a8a.firebaseapp.com",
+  projectId: "niklaus-28a8a",
+  storageBucket: "niklaus-28a8a.firebasestorage.app",
+  messagingSenderId: "129215868968",
+  appId: "1:129215868968:web:0aece864574d7e8fcf051d"
+};
+
+// Check if config is valid
+export const isConfigured = !!firebaseConfig.apiKey && firebaseConfig.apiKey !== "";
+
+let app: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
+let storage: FirebaseStorage;
+
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
+} catch (error) {
+  console.error("Firebase initialization failed:", error);
+}
+
+export { auth, db, storage };
