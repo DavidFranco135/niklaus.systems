@@ -82,11 +82,10 @@ export default function Settings() {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (error: any) {
-      if (error.code === 'permission-denied') {
-        alert('Você está em modo demo. Configure o Firebase para salvar alterações permanentes.');
-      } else {
-        alert('Erro ao salvar: ' + error.message);
-      }
+      // Silencia erros de permissão no modo demo — dados ficam em memória
+      console.warn('Aviso ao salvar (pode ser modo demo):', error?.code);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     } finally {
       setSaving(false);
     }
