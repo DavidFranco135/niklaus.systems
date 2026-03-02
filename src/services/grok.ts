@@ -1,138 +1,100 @@
 // ============================================================
-// NIKLAUS AI - Powered by xAI Grok
-// Substitui o Gemini por Grok para todas as funcionalidades de IA
+// NIKLAUS AI — xAI Grok
+// Para ativar: adicione VITE_GROK_API_KEY=xai-SuaChave no .env.local
+// Obtenha gratuitamente em: https://console.x.ai
 // ============================================================
 
-const GROK_API_KEY = import.meta.env.VITE_GROK_API_KEY || 'xai-HvqsAFMpXRUaYIbNkNsMy7H5TRNJAzWL1tl3GR7etEiTZtcTQDpgpKTnHiFWiJXPZD6KE9qFbNKGxmrK';
 const GROK_BASE_URL = 'https://api.x.ai/v1';
 
-interface GrokMessage {
+function getKey(): string {
+  const k = import.meta.env.VITE_GROK_API_KEY;
+  if (k && k.startsWith('xai-') && k.length > 30) return k;
+  // Chave padrão do sistema
+  return 'xai-6A3UbPouCGTtUkCyT1p0PQMbQSRAuYYIi12NJTgBUvtovro0y8L1R0qQNPwj5xEH4037bfqyIfhlj4Eh';
+}
+
+export interface GrokMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
 }
 
-async function grokChat(messages: GrokMessage[], maxTokens = 500): Promise<string> {
-  try {
-    const response = await fetch(`${GROK_BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GROK_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'grok-3-mini',
-        messages,
-        max_tokens: maxTokens,
-        temperature: 0.7,
-      }),
-    });
+async function grokChat(messages: GrokMessage[], maxTokens = 600): Promise<string> {
+  const key = getKey();
 
-    if (!response.ok) {
-      const err = await response.text();
-      throw new Error(`Grok API error: ${response.status} - ${err}`);
-    }
+  const res = await fetch(`${GROK_BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${key}`,
+    },
+    body: JSON.stringify({
+      model: 'grok-3-mini',
+      messages,
+      max_tokens: maxTokens,
+      temperature: 0.7,
+    }),
+  });
 
-    const data = await response.json();
-    return data.choices?.[0]?.message?.content || 'Sem resposta da IA.';
-  } catch (error) {
-    console.error('Grok API Error:', error);
-    throw error;
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`${res.status}: ${body}`);
   }
+
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content ?? 'Sem resposta.';
 }
 
-// ========================
-// Gerar descrição de produto
-// ========================
-export const generateProductDescription = async (productName: string, category: string): Promise<string> => {
+export const generateProductDescription = async (name: string, category: string): Promise<string> => {
   try {
-    const text = await grokChat([
-      {
-        role: 'system',
-        content: 'Você é um especialista em copywriting para e-commerce brasileiro. Crie descrições curtas, atrativas e focadas em vendas.',
-      },
-      {
-        role: 'user',
-        content: `Gere uma descrição comercial curta (máximo 3 linhas) para o produto "${productName}" da categoria "${category}". Seja direto, atrativo e use linguagem de vendas.`,
-      },
+    return await grokChat([
+      { role: 'system', content: 'Especialista em copywriting para e-commerce brasileiro. Respostas curtas e diretas.' },
+      { role: 'user', content: `Descrição de venda (máx 3 linhas) para: "${name}" — categoria: "${category}".` },
     ], 200);
-    return text;
   } catch {
-    return 'Descrição não disponível no momento.';
+    return 'Descrição não disponível.';
   }
 };
 
-// ========================
-// Sugerir preço de venda
-// ========================
-export const suggestPricing = async (productName: string, costPrice: number): Promise<string | null> => {
+export const suggestPricing = async (name: string, costPrice: number): Promise<string | null> => {
   try {
-    const text = await grokChat([
-      {
-        role: 'system',
-        content: 'Você é um consultor financeiro para pequeno varejo brasileiro. Responda APENAS com o valor numérico sugerido, sem texto adicional.',
-      },
-      {
-        role: 'user',
-        content: `Produto: "${productName}". Custo: R$ ${costPrice.toFixed(2)}. Qual o preço de venda ideal para o varejo brasileiro com margem saudável? Responda apenas o número.`,
-      },
-    ], 50);
-    return text.trim().replace(/[^0-9.,]/g, '');
+    const r = await grokChat([
+      { role: 'system', content: 'Consultor de varejo brasileiro. Responda APENAS com o número do preço sugerido, sem texto.' },
+      { role: 'user', content: `Produto: "${name}". Custo: R$${costPrice.toFixed(2)}. Preço de venda ideal? Só o número.` },
+    ], 20);
+    return r.replace(/[^0-9.,]/g, '') || null;
   } catch {
     return null;
   }
 };
 
-// ========================
-// Sugerir promoções
-// ========================
 export const suggestPromotions = async (salesData: any): Promise<string> => {
   try {
-    const text = await grokChat([
-      {
-        role: 'system',
-        content: 'Você é um especialista em marketing para pequeno varejo brasileiro.',
-      },
-      {
-        role: 'user',
-        content: `Com base nestes dados de vendas: ${JSON.stringify(salesData)}, sugira 3 promoções práticas e criativas para aumentar o faturamento.`,
-      },
+    return await grokChat([
+      { role: 'system', content: 'Especialista em marketing para pequeno varejo brasileiro.' },
+      { role: 'user', content: `Dados: ${JSON.stringify(salesData)}. Sugira 3 promoções práticas para aumentar vendas.` },
     ], 500);
-    return text;
   } catch {
-    return 'Sugestões não disponíveis no momento.';
+    return 'Sugestões indisponíveis.';
   }
 };
 
-// ========================
-// Chat do Assistente IA
-// ========================
-export const chatWithAssistant = async (
-  userMessage: string,
-  conversationHistory: GrokMessage[] = []
-): Promise<string> => {
+export const chatWithAssistant = async (userMessage: string, history: GrokMessage[] = []): Promise<string> => {
   try {
-    const messages: GrokMessage[] = [
+    return await grokChat([
       {
         role: 'system',
-        content: `Você é o NIKLAUS AI, assistente inteligente do sistema ERP NIKLAUS de gestão de vendas e estoque. 
-Ajude o usuário com:
-- Dúvidas sobre o sistema
-- Sugestões de preços e promoções
-- Análise de dados de vendas
-- Dicas de gestão de estoque
-- Estratégias de atendimento ao cliente
-- Controle financeiro
-Seja profissional, direto e use linguagem moderna. Responda sempre em português brasileiro.`,
+        content: `Você é o NIKLAUS AI, assistente do ERP NIKLAUS para gestão de vendas e estoque.
+Ajude com: preços, promoções, estoque, finanças, clientes, relatórios e uso do sistema.
+Seja direto, profissional e use português brasileiro.`,
       },
-      ...conversationHistory,
+      ...history.slice(-8),
       { role: 'user', content: userMessage },
-    ];
-
-    return await grokChat(messages, 800);
-  } catch (error) {
-    console.error('Chat error:', error);
-    return 'Ocorreu um erro ao conectar com a IA. Verifique sua conexão e tente novamente.';
+    ], 800);
+  } catch (err: any) {
+    console.error('Grok error:', err);
+    if (err.message?.includes('401') || err.message?.includes('400')) {
+      return '🔑 Chave Grok inválida. Corrija `VITE_GROK_API_KEY` no `.env.local` e reinicie.';
+    }
+    return '❌ Erro de conexão. Verifique sua internet e tente novamente.';
   }
 };
-
-export type { GrokMessage };
