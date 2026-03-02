@@ -1,5 +1,5 @@
 // NIKLAUS AI — Grok client
-const API_URL = "https://niklaus-systems.onrender.com";
+const API_URL = "https://niklaus-systems.onrender.com/ai";
 
 export interface GrokMessage {
   role: "system" | "user" | "assistant";
