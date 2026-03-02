@@ -1,5 +1,5 @@
 // NIKLAUS AI — Grok client
-const API_URL = "http://localhost:3001/ai";
+const API_URL = "https://niklaus-systems.onrender.com";
 
 export interface GrokMessage {
   role: "system" | "user" | "assistant";
