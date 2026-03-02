@@ -1,41 +1,128 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Cores principais */
   --color-neon-blue: #00E5FF;
   --color-dark-bg: #050505;
-  --color-card-bg: #121212;
-  --color-border-subtle: rgba(255, 255, 255, 0.1);
+  --color-card-bg: #0f0f0f;
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
 }
 
 @layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 16px;
+  }
+
   body {
     @apply bg-dark-bg text-white antialiased;
+    font-family: var(--font-sans);
+  }
+
+  /* Remove autofill styling */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #121212 inset !important;
+    -webkit-text-fill-color: white !important;
+    caret-color: white;
+  }
+
+  /* Select styling */
+  select option {
+    background-color: #0f0f0f;
+    color: white;
   }
 }
 
+/* ─── Glass Card ────────────────────────────────────────── */
 .glass-card {
-  @apply bg-card-bg border border-border-subtle rounded-2xl shadow-xl backdrop-blur-md;
+  background: rgba(15, 15, 15, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
 }
 
+/* ─── Neon Effects ──────────────────────────────────────── */
 .neon-shadow {
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+  text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+}
+
+.neon-glow {
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.25);
 }
 
 .neon-border {
-  @apply border border-neon-blue/30 hover:border-neon-blue transition-colors;
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  transition: border-color 0.2s;
 }
 
+.neon-border:hover {
+  border-color: rgba(0, 229, 255, 0.6);
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-white/10 rounded-full hover:bg-white/20;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Ocultar scrollbar mas manter funcional */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Animations ────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.05) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ─── Focus ─────────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid rgba(0, 229, 255, 0.5);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Tables ────────────────────────────────────────────── */
+.table-hover tr:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+/* ─── Transitions ───────────────────────────────────────── */
+.transition-smooth {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
