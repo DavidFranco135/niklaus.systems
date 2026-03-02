@@ -20,22 +20,22 @@ async function askGrok(prompt: string): Promise<string> {
       max_tokens: 1000,
     }),
   });
-
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const data = await response.json();
-  return data.choices?.[0]?.message?.content || 'Sem resposta da IA';
+  return data.choices?.[0]?.message?.content || 'Sem resposta';
 }
 
 export async function chatWithAssistant(
   userMessage: string,
   history: GrokMessage[] = []
 ): Promise<string> {
+  // ✅ 'system' é aceito pela xAI, 'assistant' como 1ª msg causa 400
   const messages = [
     {
-      role: 'assistant' as const,
+      role: 'system' as const,
       content:
-        'Você é o NIKLAUS AI, assistente especializado em gestão de pequenos negócios e varejo. ' +
-        'Responda sempre em português brasileiro, de forma objetiva e amigável. ' +
+        'Você é o NIKLAUS AI, assistente especializado em gestão de pequenos negócios, ' +
+        'varejo e PDV. Responda sempre em português brasileiro, de forma objetiva e amigável. ' +
         'Use **negrito** para destacar pontos importantes.',
     },
     ...history.slice(-8),
@@ -57,9 +57,10 @@ export async function chatWithAssistant(
   });
 
   if (!response.ok) {
-    if (response.status === 401) throw new Error('API Key inválida. Verifique VITE_GROK_API_KEY');
-    if (response.status === 429) throw new Error('Limite atingido. Aguarde um momento.');
-    throw new Error(`Erro HTTP ${response.status}`);
+    const err = await response.json().catch(() => ({}));
+    if (response.status === 401) throw new Error('API Key inválida. Verifique VITE_GROK_API_KEY no .env.local');
+    if (response.status === 429) throw new Error('Limite de requisições atingido. Aguarde um momento.');
+    throw new Error((err as any)?.error?.message || `Erro HTTP ${response.status}`);
   }
 
   const data = await response.json();
@@ -67,7 +68,7 @@ export async function chatWithAssistant(
 }
 
 export async function generateProductDescription(product: string): Promise<string> {
-  return askGrok(`Crie uma descrição profissional para este produto: ${product}. Máximo 3 linhas.`);
+  return askGrok(`Crie uma descrição profissional e atrativa para: ${product}. Máximo 3 linhas.`);
 }
 
 export async function suggestPricing(product: string): Promise<string> {
@@ -75,5 +76,5 @@ export async function suggestPricing(product: string): Promise<string> {
 }
 
 export async function suggestPromotions(product: string): Promise<string> {
-  return askGrok(`Sugira 3 promoções criativas para este produto para pequeno varejo: ${product}.`);
+  return askGrok(`Sugira 3 promoções criativas para pequeno varejo: ${product}.`);
 }
