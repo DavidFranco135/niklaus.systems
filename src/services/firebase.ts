@@ -1,4 +1,4 @@
-import { initializeApp, FirebaseApp } from "firebase/app";
+import { initializeApp, FirebaseApp, getApps } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
 import { getStorage, FirebaseStorage } from "firebase/storage";
@@ -9,11 +9,10 @@ const firebaseConfig = {
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "niklaus-28a8a",
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "niklaus-28a8a.firebasestorage.app",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "129215868968",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:129215868968:web:0aece864574d7e8fcf051d"
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:129215868968:web:0aece864574d7e8fcf051d",
 };
 
-// Check if config is valid
-export const isConfigured = !!firebaseConfig.apiKey && firebaseConfig.apiKey !== "";
+export const isConfigured = !!firebaseConfig.apiKey;
 
 let app: FirebaseApp;
 let auth: Auth;
@@ -21,7 +20,8 @@ let db: Firestore;
 let storage: FirebaseStorage;
 
 try {
-  app = initializeApp(firebaseConfig);
+  // Evitar inicialização duplicada
+  app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
   storage = getStorage(app);
