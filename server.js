@@ -6,8 +6,13 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("NIKLAUS AI Server Online");
+});
 
 app.post("/ai", async (req, res) => {
   try {
@@ -16,25 +21,26 @@ app.post("/ai", async (req, res) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.VITE_GROK_API_KEY}`
+        "Authorization": `Bearer ${process.env.GROK_API_KEY}`
       },
       body: JSON.stringify({
         model: "grok-2-latest",
         messages: req.body.messages,
-        max_tokens: req.body.max_tokens || 600
+        max_tokens: req.body.max_tokens || 500
       })
     });
 
     const data = await response.json();
 
-    console.log("Resposta IA:", data);
-
     res.json(data);
 
   } catch (error) {
 
-    console.error(error);
-    res.status(500).json({ error: "Erro na IA" });
+    console.error("Erro IA:", error);
+
+    res.status(500).json({
+      error: "Erro ao conectar com Grok"
+    });
 
   }
 });
