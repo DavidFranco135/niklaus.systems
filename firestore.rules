@@ -1,0 +1,137 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ───────────────────────────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuth() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.tipo == 'admin';
+    }
+
+    function isAdminOrManager() {
+      return isAuth() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.tipo == 'admin' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.tipo == 'gerente'
+      );
+    }
+
+    function isAuthUser() {
+      return isAuth() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.tipo in ['admin', 'gerente', 'vendedor']
+      );
+    }
+
+    // ─── Admin Settings ────────────────────────────────────────────────────────
+    match /adminSettings/profile {
+      allow read: if true;  // Leitura pública para tela de login
+      allow write: if isAdmin();
+    }
+
+    match /adminSettings/{docId} {
+      allow read: if isAuthUser();
+      allow write: if isAdmin();
+    }
+
+    // ─── Usuários ──────────────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isAuth() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAdmin();
+      allow update: if isAuth() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ─── Produtos ──────────────────────────────────────────────────────────────
+    match /products/{productId} {
+      allow read: if isAuthUser() || true; // true = catálogo público pode ler
+      allow create, update: if isAdminOrManager();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Vendas ────────────────────────────────────────────────────────────────
+    match /sales/{saleId} {
+      allow read: if isAuthUser();
+      allow create: if isAuthUser();
+      allow update: if isAdminOrManager();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Clientes ──────────────────────────────────────────────────────────────
+    match /customers/{customerId} {
+      allow read: if isAuthUser();
+      allow create, update: if isAuthUser();
+      allow delete: if isAdminOrManager();
+    }
+
+    // ─── Transações Financeiras ────────────────────────────────────────────────
+    match /transactions/{transactionId} {
+      allow read: if isAdminOrManager();
+      allow create: if isAuthUser();
+      allow update, delete: if isAdmin();
+    }
+
+    // ─── Estoque / Movimentações ───────────────────────────────────────────────
+    match /inventoryMovements/{movId} {
+      allow read: if isAuthUser();
+      allow create: if isAuthUser();
+      allow update, delete: if isAdminOrManager();
+    }
+
+    // ─── Pedidos ───────────────────────────────────────────────────────────────
+    match /orders/{orderId} {
+      allow read: if isAuthUser() || true; // true = clientes do catálogo
+      allow create: if true; // Qualquer um pode criar pedido (catálogo público)
+      allow update: if isAuthUser();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Fiado / Finance ───────────────────────────────────────────────────────
+    match /finance/{financeId} {
+      allow read: if isAdminOrManager();
+      allow create, update: if isAuthUser();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Planos ────────────────────────────────────────────────────────────────
+    match /plans/{planId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ─── Anúncios ──────────────────────────────────────────────────────────────
+    match /announcements/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ─── Imagens de dispositivos ──────────────────────────────────────────────
+    match /deviceImages/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ─── Faturas ──────────────────────────────────────────────────────────────
+    match /invoices/{invoiceId} {
+      allow read: if isAuth() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow write: if isAdmin();
+    }
+
+    // ─── Chamados de Suporte ──────────────────────────────────────────────────
+    match /tickets/{ticketId} {
+      allow read: if isAuth() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow create: if isAuth();
+      allow update: if isAuth() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+  }
+}
