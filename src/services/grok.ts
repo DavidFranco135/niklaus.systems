@@ -1,4 +1,3 @@
-// NIKLAUS AI — Grok client
 const API_URL = "https://niklaus-systems.onrender.com/ai";
 
 export interface GrokMessage {
@@ -20,87 +19,17 @@ async function grokChat(messages: GrokMessage[], maxTokens = 600): Promise<strin
   });
 
   if (!res.ok) {
-    const b = await res.text();
-    throw new Error(`${res.status}: ${b}`);
+    const errorText = await res.text();
+    console.error("Erro API:", errorText);
+    throw new Error("Erro na IA");
   }
 
   const data = await res.json();
 
-  return data.choices?.[0]?.message?.content ?? "Sem resposta.";
+  console.log("Resposta IA:", data);
+
+  return data?.choices?.[0]?.message?.content || "Sem resposta.";
 }
-
-export const generateProductDescription = async (
-  name: string,
-  category: string
-): Promise<string> => {
-
-  try {
-
-    return await grokChat([
-      {
-        role: "system",
-        content: "Especialista em copywriting para e-commerce brasileiro. Respostas curtas."
-      },
-      {
-        role: "user",
-        content: `Descrição de venda (máx 3 linhas) para: "${name}" — categoria: "${category}".`
-      }
-    ], 200);
-
-  } catch {
-    return "Descrição não disponível.";
-  }
-
-};
-
-export const suggestPricing = async (
-  name: string,
-  costPrice: number
-): Promise<string | null> => {
-
-  try {
-
-    const r = await grokChat([
-      {
-        role: "system",
-        content: "Consultor de varejo. Responda APENAS com o número do preço."
-      },
-      {
-        role: "user",
-        content: `Produto: "${name}". Custo: R$${costPrice.toFixed(2)}. Preço ideal?`
-      }
-    ], 20);
-
-    return r.replace(/[^0-9.,]/g, "") || null;
-
-  } catch {
-    return null;
-  }
-
-};
-
-export const suggestPromotions = async (salesData: any): Promise<string> => {
-
-  try {
-
-    return await grokChat([
-      {
-        role: "system",
-        content: "Especialista em marketing para pequeno varejo brasileiro."
-      },
-      {
-        role: "user",
-        content: `Dados: ${JSON.stringify(salesData)}. Sugira 3 promoções práticas.`
-      }
-    ], 500);
-
-  } catch {
-
-    return "Sugestões indisponíveis.";
-
-  }
-
-};
 
 export const chatWithAssistant = async (
   userMessage: string,
@@ -115,13 +44,13 @@ export const chatWithAssistant = async (
         content:
           "Você é o NIKLAUS AI, assistente do ERP NIKLAUS para gestão de vendas e estoque. Seja direto e profissional."
       },
-      ...history.slice(-8),
+      ...history,
       { role: "user", content: userMessage }
     ], 800);
 
-  } catch (err: any) {
+  } catch (err) {
 
-    console.error("Grok error:", err);
+    console.error("Erro Grok:", err);
 
     return "❌ Erro ao conectar com a IA.";
 
