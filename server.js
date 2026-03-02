@@ -1,14 +1,3 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
 app.post("/ai", async (req, res) => {
   try {
 
@@ -16,10 +5,10 @@ app.post("/ai", async (req, res) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.GROK_API_KEY}`
+        "Authorization": `Bearer ${process.env.VITE_GROK_API_KEY}`
       },
       body: JSON.stringify({
-        model: "grok-3-mini",
+        model: "grok-2-latest",
         messages: req.body.messages,
         max_tokens: req.body.max_tokens || 600
       })
@@ -27,21 +16,12 @@ app.post("/ai", async (req, res) => {
 
     const data = await response.json();
 
+    console.log("Resposta IA:", data); // ajuda a debugar
+
     res.json(data);
 
   } catch (error) {
-
-    console.error("Erro IA:", error);
-
-    res.status(500).json({
-      error: "Erro ao conectar com IA"
-    });
-
+    console.error(error);
+    res.status(500).json({ error: "Erro na IA" });
   }
-});
-
-const PORT = process.env.PORT || 3001;
-
-app.listen(PORT, () => {
-  console.log(`Servidor IA rodando na porta ${PORT}`);
 });
