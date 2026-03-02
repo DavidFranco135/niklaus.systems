@@ -36,7 +36,7 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="flex h-screen bg-dark-bg text-white overflow-hidden font-sans">
     <Sidebar />
-    <main className="flex-1 overflow-y-auto p-6 relative">
+    <main className="flex-1 overflow-y-auto p-4 lg:p-6 pt-16 lg:pt-6 relative">
       {children}
     </main>
     <AIAssistant />
