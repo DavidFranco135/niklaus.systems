@@ -15,7 +15,7 @@ import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Catalog from './pages/Catalog';
 import Login from './pages/Login';
-import { AlertTriangle, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 // ─── Guard de rota privada ─────────────────────────────────────────────────
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -36,17 +36,8 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// ─── Banner de modo demo ───────────────────────────────────────────────────
-const DemoBanner = () => {
-  const { isConfigured, user } = useAuth();
-  if (isConfigured || !user) return null;
-  return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[1000] bg-amber-500 text-black px-4 py-2 rounded-full flex items-center gap-2 text-xs font-bold shadow-xl shadow-amber-500/30">
-      <AlertTriangle size={14} />
-      MODO DEMO — Configure o Firebase no .env para persistência real
-    </div>
-  );
-};
+// Banner removido — modo demo funciona silenciosamente
+const DemoBanner = () => null;
 
 // ─── Layout interno (com sidebar) ─────────────────────────────────────────
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
