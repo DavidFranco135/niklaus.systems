@@ -1,128 +1,128 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
+/* ═══ CSS CUSTOM PROPERTIES — controladas pelo ThemeProvider ════════════ */
+:root {
+  --neon-color: #00E5FF;
+  --neon-rgb: 0, 229, 255;
+}
+
+/* ═══ DARK MODE (padrão) ═══════════════════════════════════════════════ */
+html, html.dark-mode, html:not(.light-mode) {
+  --bg:       #050505;
+  --bg-card:  #0f0f0f;
+  --bg-input: rgba(255,255,255,0.05);
+  --fg:       #ffffff;
+  --fg-60:    rgba(255,255,255,0.6);
+  --fg-40:    rgba(255,255,255,0.4);
+  --fg-20:    rgba(255,255,255,0.2);
+  --border:   rgba(255,255,255,0.08);
+}
+
+/* ═══ LIGHT MODE ════════════════════════════════════════════════════════ */
+html.light-mode {
+  --bg:       #eef0f4;
+  --bg-card:  #ffffff;
+  --bg-input: rgba(0,0,0,0.04);
+  --fg:       #0f0f0f;
+  --fg-60:    rgba(0,0,0,0.6);
+  --fg-40:    rgba(0,0,0,0.45);
+  --fg-20:    rgba(0,0,0,0.25);
+  --border:   rgba(0,0,0,0.09);
+}
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-
-  /* Cores principais */
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --color-neon-blue: #00E5FF;
-  --color-dark-bg: #050505;
-  --color-card-bg: #0f0f0f;
-  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-dark-bg:   #050505;
+  --color-card-bg:   #0f0f0f;
+  --color-border-subtle: rgba(255,255,255,0.08);
 }
 
-@layer base {
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
+/* ═══ BASE ══════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
 
-  html {
-    font-size: 16px;
-  }
+html { transition: none; }
 
-  body {
-    @apply bg-dark-bg text-white antialiased;
-    font-family: var(--font-sans);
-  }
-
-  /* Remove autofill styling */
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus,
-  input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px #121212 inset !important;
-    -webkit-text-fill-color: white !important;
-    caret-color: white;
-  }
-
-  /* Select styling */
-  select option {
-    background-color: #0f0f0f;
-    color: white;
-  }
+body {
+  background-color: var(--bg) !important;
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  min-height: 100vh;
 }
 
-/* ─── Glass Card ────────────────────────────────────────── */
+/* Autofill */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px var(--bg-card) inset !important;
+  -webkit-text-fill-color: var(--fg) !important;
+}
+select option { background-color: var(--bg-card); color: var(--fg); }
+
+/* ═══ GLASS CARD ════════════════════════════════════════════════════════ */
 .glass-card {
-  background: rgba(15, 15, 15, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 1rem;
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 32px rgba(0,0,0,0.18);
   backdrop-filter: blur(12px);
+  transition: background-color 0.25s, border-color 0.25s;
 }
 
-/* ─── Neon Effects ──────────────────────────────────────── */
-.neon-shadow {
-  text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
-}
+/* ═══ COR PRIMÁRIA DINÂMICA — todas usam var(--neon-color) ══════════════ */
+.text-neon-blue     { color: var(--neon-color) !important; }
+.bg-neon-blue       { background-color: var(--neon-color) !important; }
+.border-neon-blue   { border-color: var(--neon-color) !important; }
+.bg-neon-blue\/5    { background-color: rgba(var(--neon-rgb),0.05) !important; }
+.bg-neon-blue\/10   { background-color: rgba(var(--neon-rgb),0.10) !important; }
+.bg-neon-blue\/20   { background-color: rgba(var(--neon-rgb),0.20) !important; }
+.border-neon-blue\/10 { border-color: rgba(var(--neon-rgb),0.10) !important; }
+.border-neon-blue\/20 { border-color: rgba(var(--neon-rgb),0.20) !important; }
+.border-neon-blue\/30 { border-color: rgba(var(--neon-rgb),0.30) !important; }
+.border-neon-blue\/50 { border-color: rgba(var(--neon-rgb),0.50) !important; }
+.ring-neon-blue     { --tw-ring-color: var(--neon-color) !important; }
+.shadow-neon-blue\/20 { box-shadow: 0 4px 20px rgba(var(--neon-rgb),0.20) !important; }
+.shadow-neon-blue\/30 { box-shadow: 0 4px 30px rgba(var(--neon-rgb),0.30) !important; }
+.shadow-neon-blue\/40 { box-shadow: 0 4px 40px rgba(var(--neon-rgb),0.40) !important; }
+.focus\:border-neon-blue:focus { border-color: var(--neon-color) !important; }
+.hover\:border-neon-blue\/50:hover { border-color: rgba(var(--neon-rgb),0.50) !important; }
+.neon-shadow { text-shadow: 0 0 20px rgba(var(--neon-rgb),0.5); }
+.neon-glow   { box-shadow: 0 0 20px rgba(var(--neon-rgb),0.25); }
 
-.neon-glow {
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.25);
-}
+/* ═══ LIGHT MODE — sobrescreve classes Tailwind dark ═══════════════════ */
+html.light-mode body           { background-color: #eef0f4 !important; }
+html.light-mode #root          { background-color: #eef0f4 !important; }
+html.light-mode .bg-dark-bg    { background-color: #eef0f4 !important; }
+html.light-mode .bg-card-bg    { background-color: #ffffff !important; }
+html.light-mode .border-border-subtle { border-color: rgba(0,0,0,0.08) !important; }
+html.light-mode .text-white    { color: #111111 !important; }
+html.light-mode .text-white\/80{ color: rgba(0,0,0,0.8)  !important; }
+html.light-mode .text-white\/60{ color: rgba(0,0,0,0.6)  !important; }
+html.light-mode .text-white\/40{ color: rgba(0,0,0,0.45) !important; }
+html.light-mode .text-white\/30{ color: rgba(0,0,0,0.35) !important; }
+html.light-mode .text-white\/20{ color: rgba(0,0,0,0.28) !important; }
+html.light-mode .bg-white\/5   { background-color: rgba(0,0,0,0.04) !important; }
+html.light-mode .bg-white\/10  { background-color: rgba(0,0,0,0.07) !important; }
+html.light-mode .bg-white\/20  { background-color: rgba(0,0,0,0.12) !important; }
+html.light-mode .border-white\/5  { border-color: rgba(0,0,0,0.05) !important; }
+html.light-mode .border-white\/10 { border-color: rgba(0,0,0,0.09) !important; }
+html.light-mode .divide-white\/5  > * + * { border-color: rgba(0,0,0,0.05) !important; }
+html.light-mode .divide-white\/10 > * + * { border-color: rgba(0,0,0,0.08) !important; }
+html.light-mode .divide-border-subtle > * + * { border-color: rgba(0,0,0,0.07) !important; }
+/* Manter texto preto em botões com fundo colorido */
+html.light-mode .bg-neon-blue  { color: #000 !important; }
 
-.neon-border {
-  border: 1px solid rgba(0, 229, 255, 0.2);
-  transition: border-color 0.2s;
-}
+/* ═══ SCROLLBAR ════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(var(--neon-rgb),0.25); border-radius:999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(var(--neon-rgb),0.45); }
+.scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
+.scrollbar-hide::-webkit-scrollbar { display:none; }
 
-.neon-border:hover {
-  border-color: rgba(0, 229, 255, 0.6);
-}
-
-/* ─── Scrollbar ─────────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* Ocultar scrollbar mas manter funcional */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* ─── Animations ────────────────────────────────────────── */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.shimmer {
-  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.05) 50%, transparent 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-/* ─── Focus ─────────────────────────────────────────────── */
-*:focus-visible {
-  outline: 2px solid rgba(0, 229, 255, 0.5);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* ─── Tables ────────────────────────────────────────────── */
-.table-hover tr:hover {
-  background: rgba(255,255,255,0.02);
-}
-
-/* ─── Transitions ───────────────────────────────────────── */
-.transition-smooth {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* ═══ FOCUS ════════════════════════════════════════════════════════════ */
+*:focus-visible { outline:2px solid rgba(var(--neon-rgb),0.5); outline-offset:2px; border-radius:4px; }
