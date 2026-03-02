@@ -1,59 +1,44 @@
-const API_URL = "https://niklaus-systems.onrender.com/ai";
+const GROK_API_KEY = import.meta.env.VITE_GROK_API_KEY;
 
-export interface GrokMessage {
-  role: "system" | "user" | "assistant";
-  content: string;
-}
-
-async function grokChat(messages: GrokMessage[], maxTokens = 600): Promise<string> {
-
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      messages,
-      max_tokens: maxTokens
-    })
-  });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    console.error("Erro API:", errorText);
-    throw new Error("Erro na IA");
-  }
-
-  const data = await res.json();
-
-  console.log("Resposta IA:", data);
-
-  return data?.choices?.[0]?.message?.content || "Sem resposta.";
-}
-
-export const chatWithAssistant = async (
-  userMessage: string,
-  history: GrokMessage[] = []
-): Promise<string> => {
-
+async function askGrok(prompt: string) {
   try {
-
-    return await grokChat([
-      {
-        role: "system",
-        content:
-          "Você é o NIKLAUS AI, assistente do ERP NIKLAUS para gestão de vendas e estoque. Seja direto e profissional."
+    const response = await fetch("https://api.x.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${GROK_API_KEY}`,
       },
-      ...history,
-      { role: "user", content: userMessage }
-    ], 800);
+      body: JSON.stringify({
+        model: "grok-2-latest",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.7,
+      }),
+    });
 
-  } catch (err) {
+    const data = await response.json();
 
-    console.error("Erro Grok:", err);
+    console.log("GROK RESPONSE:", data);
 
-    return "❌ Erro ao conectar com a IA.";
-
+    return data.choices?.[0]?.message?.content || "Sem resposta da IA";
+  } catch (error) {
+    console.error("Erro ao chamar Grok:", error);
+    return "Erro ao gerar resposta da IA";
   }
+}
 
-};
+export async function generateProductDescription(product: string) {
+  return askGrok(`Crie uma descrição profissional para este produto: ${product}`);
+}
+
+export async function suggestPricing(product: string) {
+  return askGrok(`Sugira um preço competitivo para este produto: ${product}`);
+}
+
+export async function suggestPromotions(product: string) {
+  return askGrok(`Sugira uma promoção criativa para este produto: ${product}`);
+}
