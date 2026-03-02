@@ -1,12 +1,8 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import Sidebar from './components/Sidebar';
+import AIAssistant from './components/AIAssistant';
 import Dashboard from './pages/Dashboard';
 import POS from './pages/POS';
 import Products from './pages/Products';
@@ -19,62 +15,85 @@ import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Catalog from './pages/Catalog';
 import Login from './pages/Login';
-import AIAssistant from './components/AIAssistant';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 
+// ─── Guard de rota privada ─────────────────────────────────────────────────
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, isConfigured } = useAuth();
-  
-  if (loading) return (
-    <div className="flex items-center justify-center h-screen bg-[#050505] text-[#00E5FF]">
-      <div className="animate-pulse text-2xl font-bold tracking-widest">NIKLAUS</div>
-    </div>
-  );
-  
-  // In demo mode (not configured), we allow access to everything.
-  // In a real app, we would redirect to login if !user.
-  if (isConfigured && !user) return <Navigate to="/login" />;
-  
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-dark-bg text-neon-blue flex-col gap-4">
+        <Loader2 size={40} className="animate-spin" />
+        <p className="text-sm font-bold tracking-widest text-white/40 uppercase animate-pulse">
+          Carregando NIKLAUS...
+        </p>
+      </div>
+    );
+  }
+
+  if (isConfigured && !user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
 
-const FirebaseWarning = () => {
-  const { isConfigured } = useAuth();
-  if (isConfigured) return null;
-
+// ─── Banner de modo demo ───────────────────────────────────────────────────
+const DemoBanner = () => {
+  const { isConfigured, user } = useAuth();
+  if (isConfigured || !user) return null;
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[1000] bg-amber-500 text-black px-4 py-2 rounded-full flex items-center gap-2 text-xs font-bold shadow-lg shadow-amber-500/20 animate-bounce">
-      <AlertTriangle size={16} />
-      MODO DEMO: Configure o Firebase no arquivo .env para habilitar persistência.
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[1000] bg-amber-500 text-black px-4 py-2 rounded-full flex items-center gap-2 text-xs font-bold shadow-xl shadow-amber-500/30">
+      <AlertTriangle size={14} />
+      MODO DEMO — Configure o Firebase no .env para persistência real
     </div>
   );
 };
 
+// ─── Layout interno (com sidebar) ─────────────────────────────────────────
+const AppLayout = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex h-screen bg-dark-bg text-white overflow-hidden font-sans">
+    <DemoBanner />
+    <Sidebar />
+    <main className="flex-1 overflow-y-auto p-6 relative">
+      {children}
+    </main>
+    <AIAssistant />
+  </div>
+);
+
+// ─── App root ──────────────────────────────────────────────────────────────
 export default function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="flex h-screen bg-[#050505] text-white overflow-hidden font-sans">
-          <FirebaseWarning />
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto p-6 relative">
-            <Routes>
-              <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-              <Route path="/pos" element={<PrivateRoute><POS /></PrivateRoute>} />
-              <Route path="/products" element={<PrivateRoute><Products /></PrivateRoute>} />
-              <Route path="/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
-              <Route path="/customers" element={<PrivateRoute><Customers /></PrivateRoute>} />
-              <Route path="/fiado" element={<PrivateRoute><Fiado /></PrivateRoute>} />
-              <Route path="/finance" element={<PrivateRoute><Finance /></PrivateRoute>} />
-              <Route path="/orders" element={<PrivateRoute><Orders /></PrivateRoute>} />
-              <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
-              <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
-              <Route path="/catalog" element={<PrivateRoute><Catalog /></PrivateRoute>} />
-              <Route path="/login" element={<Login />} />
-            </Routes>
-            <AIAssistant />
-          </main>
-        </div>
+        <Routes>
+          {/* Página de login — sem sidebar */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Rotas protegidas com sidebar */}
+          <Route
+            path="/*"
+            element={
+              <PrivateRoute>
+                <AppLayout>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/pos" element={<POS />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/inventory" element={<Inventory />} />
+                    <Route path="/customers" element={<Customers />} />
+                    <Route path="/fiado" element={<Fiado />} />
+                    <Route path="/finance" element={<Finance />} />
+                    <Route path="/orders" element={<Orders />} />
+                    <Route path="/reports" element={<Reports />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/catalog" element={<Catalog />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </AppLayout>
+              </PrivateRoute>
+            }
+          />
+        </Routes>
       </Router>
     </AuthProvider>
   );
